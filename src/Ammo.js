@@ -1,11 +1,15 @@
 import { ElementEntity } from "./ElementEntity";
 
-export class Ammo extends ElementEntity{
-    constructor({x, y}){
-        super({tag: 'div', className:'ammo'});
+const AMMO_REDUCTION_RATE = 1;
 
+export class Ammo extends ElementEntity{
+    constructor({x, y, reduceAmmo}){
+        super({tag: 'div', className:'ammo'});
+        // passing the reduce ammo function
+        this.reduceAmmo = reduceAmmo;
         this.setX(x);
-        this.setY(y); 
+        this.setY(y);
+        this.reduceAmmo(AMMO_REDUCTION_RATE);
     }
 
     // bullet movement up

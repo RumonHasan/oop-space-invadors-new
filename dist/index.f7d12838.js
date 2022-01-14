@@ -543,18 +543,19 @@ document.addEventListener('keyup', (event)=>{
 const ship = new _ship.Ship(); // main ship object
 // ammo guns
 const ammoArtilery = []; // first gun
-// create ammo
-const createAmmo = ({ x , y  })=>{
-    ammoArtilery.push(new _ammo.Ammo({
-        x,
-        y
-    }));
-};
 // weapons stock
 const weaponStock = new _weaponStock.WeaponStock({
     x: window.innerWidth / 8,
     y: window.innerHeight - 60
 });
+// create ammo
+const createAmmo = ({ x , y  })=>{
+    ammoArtilery.push(new _ammo.Ammo({
+        x,
+        y,
+        reduceAmmo: (ammo)=>weaponStock.updateWeaponStock(ammo)
+    }));
+};
 // main update loop 
 const updateGame = ()=>{
     // moving the ship left and right 
@@ -617,7 +618,7 @@ class Ship extends _elementEntity.ElementEntity {
                 y: this.y
             });
             setTimeout(()=>{
-                this.fireAbility = true, this.AMMO_LOADED -= 1;
+                this.fireAbility = true;
             }, 1000);
         }
     }
@@ -638,8 +639,8 @@ class ElementEntity {
         // speeds
         this.SHIP_SPEED = 3;
         this.AMMO_SPEED = 5;
-        // ammo loaded
-        this.AMMO_LOADED = 100;
+        // initial ammo
+        this.INITIAL_AMMO = 10;
     }
     // setting the positions of the elment on the screen
     setX(x) {
@@ -693,14 +694,18 @@ parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Ammo", ()=>Ammo
 );
 var _elementEntity = require("./ElementEntity");
+const AMMO_REDUCTION_RATE = 1;
 class Ammo extends _elementEntity.ElementEntity {
-    constructor({ x , y  }){
+    constructor({ x , y , reduceAmmo  }){
         super({
             tag: 'div',
             className: 'ammo'
         });
+        // passing the reduce ammo function
+        this.reduceAmmo = reduceAmmo;
         this.setX(x);
         this.setY(y);
+        this.reduceAmmo(AMMO_REDUCTION_RATE);
     }
     // bullet movement up
     ammoUpdate() {
@@ -720,10 +725,25 @@ class WeaponStock extends _elementEntity.ElementEntity {
             tag: 'div',
             className: 'weapon-stock'
         });
-        this.element.innerHTML += this.AMMO_LOADED;
         // setting weapon stock dimensions
         this.setX(x);
         this.setY(y);
+        this.refreshElement();
+    }
+    // updating the weapon stock
+    updateWeaponStock(ammo) {
+        if (this.INITIAL_AMMO > 1) {
+            this.INITIAL_AMMO -= ammo;
+            this.refreshElement();
+        } else this.reloadAmmo();
+    }
+    //reload warning
+    reloadAmmo() {
+        this.element.innerText = 'RELOAD: REQUIRED';
+    }
+    // refreshes the score and replaces the score element
+    refreshElement() {
+        this.element.innerText = `AMMO LEFT: ${this.INITIAL_AMMO}`;
     }
 }
 

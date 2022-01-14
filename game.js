@@ -27,18 +27,20 @@ const ship = new Ship(); // main ship object
 // ammo guns
 const ammoArtilery = []; // first gun
 
-// create ammo
-const createAmmo = ({x, y})=>{
-    ammoArtilery.push(new Ammo({
-        x,
-        y
-    }));
-};
 // weapons stock
 const weaponStock = new WeaponStock({
     x: window.innerWidth / 8,
     y: window.innerHeight - 60,
 });
+
+// create ammo
+const createAmmo = ({x, y})=>{
+    ammoArtilery.push(new Ammo({
+        x,
+        y,
+        reduceAmmo: (ammo)=> weaponStock.updateWeaponStock(ammo),
+    }));
+};
 
 // main update loop 
 const updateGame = ()=>{    
@@ -55,7 +57,6 @@ const updateGame = ()=>{
         ship.fireControl({
             createAmmo,
         });
-      
     }
 
     // udpating the ammo movement

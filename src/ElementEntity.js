@@ -8,10 +8,10 @@ export class ElementEntity{
         // speeds
         this.SHIP_SPEED = 3;
         this.AMMO_SPEED = 5;
-        // ammo loaded
-        this.AMMO_LOADED = 100;
-    }
+        // initial ammo
+        this.INITIAL_AMMO = 10;
 
+    }
     // setting the positions of the elment on the screen
     setX(x){
         this.x = x;

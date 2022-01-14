@@ -14,6 +14,7 @@ export class Ship extends ElementEntity{
         this.setX(window.innerWidth / 2);
         this.setY(window.innerHeight - HEIGHT_PIXEL_DEF);
 
+
     }
 
     // enabling the ship to move left and right
@@ -30,10 +31,9 @@ export class Ship extends ElementEntity{
             this.fireAbility = false;
             createAmmo({
                 x: this.x + this.SHIP_WIDTH / 2,
-                y: this.y
+                y: this.y,
             });
-            setTimeout(()=> {this.fireAbility = true,
-            this.AMMO_LOADED -= 1}, 1000);
+            setTimeout(()=> {this.fireAbility = true}, 1000);
         }
         
     }
