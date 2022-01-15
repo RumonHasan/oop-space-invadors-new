@@ -519,6 +519,7 @@ function hmrAcceptRun(bundle, id) {
 }
 
 },{}],"bP9EE":[function(require,module,exports) {
+var _alien = require("./src/Alien");
 var _ammo = require("./src/Ammo");
 var _ship = require("./src/Ship");
 var _weaponStock = require("./src/WeaponStock");
@@ -543,6 +544,54 @@ document.addEventListener('keyup', (event)=>{
 const ship = new _ship.Ship(); // main ship object
 // ammo guns
 const ammoArtilery = []; // first gun
+// alien array
+const ALIEN_ROW = 4;
+const ALIEN_COL = 4;
+const alienArmy = [];
+// removal of ammo and alien upon contact from dom and array
+const removeAlien = (alien)=>{
+    alienArmy.splice(alienArmy.indexOf(alien), 1);
+    alien.removeElement();
+};
+const removeAmmo = (ammo)=>{
+    ammoArtilery.splice(ammoArtilery.indexOf(ammo), 1);
+    ammo.removeElement();
+};
+// return the bullet and ammo DOM elem => that made contact
+const getAmmoContact = (alien)=>{
+    ammoArtilery.forEach((ammo)=>{
+        if (isAmmoContact(alien, ammo)) console.log(ammo);
+    });
+    return null;
+};
+// spawning the alien matrix
+for(let row = 0; row < ALIEN_ROW; row++)for(let col = 0; col < ALIEN_COL; col++){
+    const newAlien = new _alien.Alien({
+        x: col * 60 + 30,
+        y: row * 60 + 30,
+        removeAlien,
+        removeAmmo,
+        getAmmoContact
+    });
+    // updating the alien army
+    alienArmy.push(newAlien);
+}
+// returning true or false on contact
+const isAmmoContact = (alien, ammo)=>{
+    const rect1 = alien.element.getBoundingClientRect();
+    const rect2 = ammo.element.getBoundingClientRect();
+    return !(rect1.right < rect2.left || rect1.left > rect2.right || rect1.bottom < rect2.top || rect1.top > rect2.bottom);
+};
+// gets the first top left element
+const getLeftTopAlien = ()=>{
+    return alienArmy.reduce((alien, currentAlien)=>currentAlien.x >= alien.x ? alien : currentAlien
+    );
+};
+// gets the right first element
+const getRightTopAlien = ()=>{
+    return alienArmy.reduce((alien, currentAlien)=>currentAlien.x > alien.x ? currentAlien : alien
+    );
+};
 // weapons stock
 const weaponStock = new _weaponStock.WeaponStock({
     x: window.innerWidth / 8,
@@ -576,13 +625,27 @@ const updateGame = ()=>{
             ammoArtilery.splice(ammoArtilery.indexOf(ammo), 1);
         }
     });
+    // updating the alien movement
+    alienArmy.forEach((alien)=>{
+        alien.updateAlienMovement();
+    });
+    // left border
+    const leftTopAlien = getLeftTopAlien();
+    if (leftTopAlien.x < 30) alienArmy.forEach((alien)=>{
+        alien.moveRight();
+    });
+    // right border
+    const rightTopAlien = getRightTopAlien();
+    if (rightTopAlien.x > window.innerWidth - 30) alienArmy.forEach((alien)=>{
+        alien.moveLeft();
+    });
 };
 // updating game every 20 milliseconds 
 setInterval(()=>{
     updateGame();
 }, UPDATE_TIMEFRAME);
 
-},{"./src/Ship":"cYhYk","./src/Ammo":"jAA3a","./src/WeaponStock":"lYarv"}],"cYhYk":[function(require,module,exports) {
+},{"./src/Ship":"cYhYk","./src/Ammo":"jAA3a","./src/WeaponStock":"lYarv","./src/Alien":"3mRj3"}],"cYhYk":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 parcelHelpers.export(exports, "Ship", ()=>Ship
@@ -747,6 +810,88 @@ class WeaponStock extends _elementEntity.ElementEntity {
     }
 }
 
-},{"./ElementEntity":"lvWQr","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}]},["5ytRy","bP9EE"], "bP9EE", "parcelRequire3f88")
+},{"./ElementEntity":"lvWQr","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"3mRj3":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "Alien", ()=>Alien
+);
+var _elementEntity = require("./ElementEntity");
+var _alienPng = require("./images/alien.png");
+var _alienPngDefault = parcelHelpers.interopDefault(_alienPng);
+class Alien extends _elementEntity.ElementEntity {
+    constructor({ x , y , removeAlien , removeAmmo , getAmmoContact  }){
+        super({
+            tag: 'img',
+            className: 'alien'
+        });
+        this.element.src = _alienPngDefault.default;
+        // settting the alien
+        this.setX(x);
+        this.setY(y);
+        // alien movement speed
+        this.ALIEN_SPEED = 3;
+        // default direction
+        this.alienDirection = 'left';
+        // alien contact
+        this.removeAlien = removeAlien;
+        this.removeAmmo = removeAmmo;
+        this.getAmmoContact = getAmmoContact;
+    }
+    // udpate the alien movement
+    moveLeft() {
+        this.alienDirection = 'left';
+    }
+    moveRight() {
+        this.alienDirection = 'right';
+    }
+    // updating alien movements based on direction
+    updateAlienMovement() {
+        if (this.alienDirection === 'left') this.setX(this.x - this.ALIEN_SPEED);
+        else this.setX(this.x + this.ALIEN_SPEED);
+        // passes the alien and checks for overlapping bullet
+        const ammoContactBullet = this.getAmmoContact(this);
+        if (ammoContactBullet) this.removeAlien(this);
+    }
+}
+
+},{"./ElementEntity":"lvWQr","./images/alien.png":"cKoeH","@parcel/transformer-js/src/esmodule-helpers.js":"ciiiV"}],"cKoeH":[function(require,module,exports) {
+module.exports = require('./helpers/bundle-url').getBundleURL('gTlYB') + "alien.cf6a1e15.png" + "?" + Date.now();
+
+},{"./helpers/bundle-url":"chiK4"}],"chiK4":[function(require,module,exports) {
+"use strict";
+var bundleURL = {
+};
+function getBundleURLCached(id) {
+    var value = bundleURL[id];
+    if (!value) {
+        value = getBundleURL();
+        bundleURL[id] = value;
+    }
+    return value;
+}
+function getBundleURL() {
+    try {
+        throw new Error();
+    } catch (err) {
+        var matches = ('' + err.stack).match(/(https?|file|ftp):\/\/[^)\n]+/g);
+        if (matches) // The first two stack frames will be this function and getBundleURLCached.
+        // Use the 3rd one, which will be a runtime in the original bundle.
+        return getBaseURL(matches[2]);
+    }
+    return '/';
+}
+function getBaseURL(url) {
+    return ('' + url).replace(/^((?:https?|file|ftp):\/\/.+)\/[^/]+$/, '$1') + '/';
+} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+function getOrigin(url) {
+    var matches = ('' + url).match(/(https?|file|ftp):\/\/[^/]+/);
+    if (!matches) throw new Error('Origin not found');
+    return matches[0];
+}
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
+
+},{}]},["5ytRy","bP9EE"], "bP9EE", "parcelRequire3f88")
 
 //# sourceMappingURL=index.f7d12838.js.map
